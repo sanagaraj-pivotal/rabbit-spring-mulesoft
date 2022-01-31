@@ -1,0 +1,34 @@
+{
+  "extensionModelLoaderDescriptor": {
+    "id": "java",
+    "attributes": {
+      "type": "com.mule.extensions.amqp.internal.AmqpConnector",
+      "version": "1.7.3"
+    }
+  },
+  "license": {
+    "allowsEvaluation": true
+  },
+  "name": "AMQP",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "privilegedExportedPackages": [],
+      "privilegedArtifactIds": [],
+      "exportedPackages": [
+        "com.mule.extensions.amqp.api.model",
+        "com.mule.extensions.amqp.api.message",
+        "com.mule.extensions.amqp.api.config",
+        "com.mule.extensions.amqp.api.listener",
+        "com.mule.extensions.amqp.api.exception"
+      ],
+      "exportedResources": []
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  },
+  "minMuleVersion": "4.1.1"
+}

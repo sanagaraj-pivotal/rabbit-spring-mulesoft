@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension-documentation>
+    <configs>
+        <config name="config">
+            <description><![CDATA[Base configuration for AmqpConnector]]></description>
+            <parameters>
+                <parameter name="encoding">
+                    <description><![CDATA[The default encoding of the Message body to be used if the message doesn't communicate it]]></description>
+                </parameter>
+                <parameter name="contentType">
+                    <description><![CDATA[The default contentType of the Message body to be used if the message doesn't communicate it]]></description>
+                </parameter>
+                <parameter name="createFallbackQueue">
+                    <description><![CDATA[Whether non existing queues will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.]]></description>
+                </parameter>
+                <parameter name="createFallbackExchange">
+                    <description><![CDATA["Whether non existing exchanges will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.]]></description>
+                </parameter>
+                <parameter name="sendCorrelationId">
+                    <description><![CDATA[Whether to specify a correlationId when publishing messages. This applies both for custom correlation ids specifies at the operation level and for default correlation Ids taken from the current event]]></description>
+                </parameter>
+                <parameter name="expirationPolicy">
+                    <description><![CDATA[Configures the minimum amount of time that a dynamic configuration instance can remain idle before the runtime considers it eligible for expiration. This does not mean that the platform will expire the instance at the exact moment that it becomes eligible. The runtime will actually purge the instances when it sees it fit.]]></description>
+                </parameter>
+                <parameter name="ackMode">
+                    <description><![CDATA[The acknowledgment mode to use when consuming from the AMQP broker. If a transaction is opened in the channel, message acknowledgment is handled automatically by commit, and recovery is handled automatically by rollback.]]></description>
+                </parameter>
+                <parameter name="noLocal">
+                    <description><![CDATA[If set to true, the server does not send messages to the connection that published them.]]></description>
+                </parameter>
+                <parameter name="exclusiveConsumers">
+                    <description><![CDATA[Set to true if the connector should only create exclusive consumers. Only the consumer created can access the queue.]]></description>
+                </parameter>
+                <parameter name="numberOfConsumers">
+                    <description><![CDATA[It is the number of consumers spawned by message source to receive AMQP messages. Each consumer will create a channel.]]></description>
+                </parameter>
+                <parameter name="deliveryMode">
+                    <description><![CDATA[The delivery mode to use when publishing to the AMQP broker.]]></description>
+                </parameter>
+                <parameter name="priority">
+                    <description><![CDATA[The priority to use when publishing to the AMQP broker. The priority has possible values from 0 to 9 - default is 0.]]></description>
+                </parameter>
+                <parameter name="requestBrokerConfirms">
+                    <description><![CDATA[Whether it must fail in case no confirmation is provided.]]></description>
+                </parameter>
+                <parameter name="mandatory">
+                    <description><![CDATA[Whether the operation must fail if it cannot be routed to a queue.]]></description>
+                </parameter>
+                <parameter name="immediate">
+                    <description><![CDATA[Whether the operation must fail if it cannot be routed to a queue consumer immediately.]]></description>
+                </parameter>
+                <parameter name="returnedMessageExchange">
+                    <description><![CDATA[The exchange to publish returned messages.]]></description>
+                </parameter>
+                <parameter name="prefetchSize">
+                    <description><![CDATA[This field defines a prefetch size window. The broker will send as much messages as possible without exceeding the prefetchSize window in octets (bytes). 0 is used for no specific limit.]]></description>
+                </parameter>
+                <parameter name="prefetchCount">
+                    <description><![CDATA[Specifies a global prefetch window in terms of whole messages. This field may be used in combination with the prefetch-size field; a message will only be sent in advance if both prefetch windows allow it. 0 is used for no specific limit.]]></description>
+                </parameter>
+            </parameters>
+        </config>
+    </configs>
+    <connections>
+        <connection name="connection">
+            <description><![CDATA[Generic implementation of a AMQP ConnectionProvider.]]></description>
+            <parameters>
+                <parameter name="tlsContext">
+                    <description><![CDATA[Reference to a TLS config element. This will enable secure connection to the AMQP broker.]]></description>
+                </parameter>
+                <parameter name="socketConfiguration">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="host">
+                    <description><![CDATA[Host of the broker to connect to.]]></description>
+                </parameter>
+                <parameter name="port">
+                    <description><![CDATA[Port of the AMQP broker to connect to.]]></description>
+                </parameter>
+                <parameter name="virtualHost">
+                    <description><![CDATA[Virtual host to use in the AMQP broker.]]></description>
+                </parameter>
+                <parameter name="username">
+                    <description><![CDATA[Username to be used when providing credentials for authentication.]]></description>
+                </parameter>
+                <parameter name="password">
+                    <description><![CDATA[Password to be used when providing credentials for authentication.]]></description>
+                </parameter>
+                <parameter name="useTls">
+                    <description><![CDATA[Whether TLS is needed to be used. In case it is not provided, the default for AMQP connection will be used.]]></description>
+                </parameter>
+                <parameter name="useSni">
+                    <description><![CDATA[Whether Server Name Indication is needed to be used in the ClientHello Message]]></description>
+                </parameter>
+                <parameter name="useSasl">
+                    <description><![CDATA[Whether SASL (EXTERNAL) Auth mechanism is used (No username or password required).]]></description>
+                </parameter>
+                <parameter name="heartbeatTimeout">
+                    <description><![CDATA[The heartbeat timeout. Heartbeat frames will be sent at about 1/2 the timeout interval.]]></description>
+                </parameter>
+                <parameter name="handshakeTimeout">
+                    <description><![CDATA[AMQP 0.9.1 timeout to set to the underlying AMQP connector.]]></description>
+                </parameter>
+                <parameter name="handshakeTimeoutTimeUnit">
+                    <description><![CDATA[Timeunit for the handshake timeout AMQP connection socket configuration.]]></description>
+                </parameter>
+                <parameter name="fallbackAddresses">
+                    <description><![CDATA[The addresses of the broker nodes to attempt connection to, should the connection to main broker fail.]]></description>
+                </parameter>
+                <parameter name="reconnection">
+                    <description><![CDATA[When the application is deployed, a connectivity test is performed on all connectors. If set to true, deployment will fail if the test doesn't pass after exhausting the associated reconnection strategy]]></description>
+                </parameter>
+            </parameters>
+        </connection>
+    </connections>
+    <extension name="AMQP">
+        <description><![CDATA[AmqpConnector is a AMQP 0.9.1 compliant MuleSoft Extension, used to consume and produce AMQP Messages. The Extension supports all AMQP functionality including for exchange and queue management, publish and consume message as well as AMQP transactions and acknowledgements.]]></description>
+        <parameters/>
+    </extension>
+    <operations>
+        <operation name="consume">
+            <description><![CDATA[Operation that allows the user to consume a single AmqpMessage from a given Queue.]]></description>
+            <parameters>
+                <parameter name="queueName">
+                    <description><![CDATA[The name of the queue from where the Message should be consumed]]></description>
+                </parameter>
+                <parameter name="contentType">
+                    <description><![CDATA[The content type of the message body]]></description>
+                </parameter>
+                <parameter name="encoding">
+                    <description><![CDATA[The encoding of the message body]]></description>
+                </parameter>
+                <parameter name="fallbackQueueDefinition">
+                    <description><![CDATA[The queue definition to use for queue declaration in case there is no queue with the queueName]]></description>
+                </parameter>
+                <parameter name="ackMode">
+                    <description><![CDATA[The ACK mode to use when consuming a message]]></description>
+                </parameter>
+                <parameter name="consumerTag">
+                    <description><![CDATA[The consumer tag to use for the consumer involved in the operation]]></description>
+                </parameter>
+                <parameter name="maximumWait">
+                    <description><![CDATA[Maximum time to wait for a message to arrive before timeout]]></description>
+                </parameter>
+                <parameter name="maximumWaitUnit">
+                    <description><![CDATA[Time unit to be used in the maximumWaitTime configuration]]></description>
+                </parameter>
+                <parameter name="createFallbackQueue">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="transactionalAction">
+                    <description><![CDATA[information of the current transaction in case it exists]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+                <parameter name="reconnectionStrategy">
+                    <description><![CDATA[A retry strategy in case of connectivity errors]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="publish">
+            <description><![CDATA[Operation that allows the user to publish a single AmqpMessage to a given exchange]]></description>
+            <parameters>
+                <parameter name="exchangeName">
+                    <description><![CDATA[The name of the exchange to publish the message to]]></description>
+                </parameter>
+                <parameter name="fallbackExchangeDefinition">
+                    <description><![CDATA[The exchange to use for exchange declaration in case there is no exchange with the exchangeName]]></description>
+                </parameter>
+                <parameter name="routingKeys">
+                    <description><![CDATA[List of routing keys]]></description>
+                </parameter>
+                <parameter name="deliveryMode">
+                    <description><![CDATA[The delivery mode to use when publishing to the AMQP broker]]></description>
+                </parameter>
+                <parameter name="transactionalAction">
+                    <description><![CDATA[information of the current transaction in case it exists]]></description>
+                </parameter>
+                <parameter name="sendCorrelationId">
+                    <description><![CDATA[options on whether to include an outbound correlation id or not]]></description>
+                </parameter>
+                <parameter name="createFallbackExchange">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="body">
+                    <description><![CDATA[The body of the Message]]></description>
+                </parameter>
+                <parameter name="properties">
+                    <description><![CDATA[Properties of the message]]></description>
+                </parameter>
+                <parameter name="headers">
+                    <description><![CDATA[The custom user properties that should be set to this AmqpMessage]]></description>
+                </parameter>
+                <parameter name="requestBrokerConfirms">
+                    <description><![CDATA[Expects a confirmation from a message published. An exception is raised in case no confirmation is provided in case this attribute is set to true.]]></description>
+                </parameter>
+                <parameter name="mandatory">
+                    <description><![CDATA[Tells the server how to react if the message cannot be routed to a queue. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any message that cannot be routed. If set to false, the server silently drops the message.]]></description>
+                </parameter>
+                <parameter name="immediate">
+                    <description><![CDATA[Tells the server how to react if the message cannot be routed to a queue consumer immediately. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any undeliverable message. If set to false, the server queues the message, but with no guarantee that the message will ever be consumed.]]></description>
+                </parameter>
+                <parameter name="returnedMessageExchange">
+                    <description><![CDATA[The exchange to publish returned messages.]]></description>
+                </parameter>
+                <parameter name="reconnectionStrategy">
+                    <description><![CDATA[A retry strategy in case of connectivity errors]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="publishConsume">
+            <description><![CDATA[Operation that allows the user to send a message to a AMQP Exchange and waits for a response either to the provided replyTo destination or to a temporary destination created dynamically]]></description>
+            <parameters>
+                <parameter name="exchangeName">
+                    <description><![CDATA[The name of the exchange to publish the message to]]></description>
+                </parameter>
+                <parameter name="contentType">
+                    <description><![CDATA[The content type of the message body]]></description>
+                </parameter>
+                <parameter name="encoding">
+                    <description><![CDATA[The encoding of the message body]]></description>
+                </parameter>
+                <parameter name="fallbackExchangeDefinition">
+                    <description><![CDATA[The queue exchange to use for exchange declaration in case there is no exchange with the exchangeName]]></description>
+                </parameter>
+                <parameter name="routingKey">
+                    <description><![CDATA[The routing key to publish to]]></description>
+                </parameter>
+                <parameter name="deliveryMode">
+                    <description><![CDATA[The delivery mode to use when publishing to the AMQP broker]]></description>
+                </parameter>
+                <parameter name="maximumWait">
+                    <description><![CDATA[The maximum time to wait for a message to arrive before timeout]]></description>
+                </parameter>
+                <parameter name="maximumWaitUnit">
+                    <description><![CDATA[The time unit to be used in the maximumWaitTime configuration]]></description>
+                </parameter>
+                <parameter name="transactionalAction">
+                    <description><![CDATA[information of the current transaction in case it exists]]></description>
+                </parameter>
+                <parameter name="sendCorrelationId">
+                    <description><![CDATA[options on whether to include an outbound correlation id or not]]></description>
+                </parameter>
+                <parameter name="createFallbackExchange">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="body">
+                    <description><![CDATA[The body of the Message]]></description>
+                </parameter>
+                <parameter name="properties">
+                    <description><![CDATA[Properties of the message]]></description>
+                </parameter>
+                <parameter name="headers">
+                    <description><![CDATA[The custom user properties that should be set to this AmqpMessage]]></description>
+                </parameter>
+                <parameter name="requestBrokerConfirms">
+                    <description><![CDATA[Expects a confirmation from a message published. An exception is raised in case no confirmation is provided in case this attribute is set to true.]]></description>
+                </parameter>
+                <parameter name="mandatory">
+                    <description><![CDATA[Tells the server how to react if the message cannot be routed to a queue. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any message that cannot be routed. If set to false, the server silently drops the message.]]></description>
+                </parameter>
+                <parameter name="immediate">
+                    <description><![CDATA[Tells the server how to react if the message cannot be routed to a queue consumer immediately. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any undeliverable message. If set to false, the server queues the message, but with no guarantee that the message will ever be consumed.]]></description>
+                </parameter>
+                <parameter name="returnedMessageExchange">
+                    <description><![CDATA[The exchange to publish returned messages.]]></description>
+                </parameter>
+                <parameter name="target">
+                    <description><![CDATA[The name of a variable on which the operation's output will be placed]]></description>
+                </parameter>
+                <parameter name="targetValue">
+                    <description><![CDATA[An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable]]></description>
+                </parameter>
+                <parameter name="reconnectionStrategy">
+                    <description><![CDATA[A retry strategy in case of connectivity errors]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="ack">
+            <description><![CDATA[Operation that acks a message with the delivery tag]]></description>
+            <parameters>
+                <parameter name="ackId">
+                    <description><![CDATA[delivery tag of the message to be ack'ed]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+        <operation name="reject">
+            <description><![CDATA[Operation that allows the user to reject a delivered AmqpMessage.]]></description>
+            <parameters>
+                <parameter name="ackId">
+                    <description><![CDATA[delivery tag of the message to be rejected]]></description>
+                </parameter>
+                <parameter name="requeue">
+                    <description><![CDATA[Indicates whether the rejected message has to be requeued]]></description>
+                </parameter>
+            </parameters>
+        </operation>
+    </operations>
+    <sources>
+        <source name="listener">
+            <description><![CDATA[AMQP Listener for Queues, allows to listen for incoming messages.]]></description>
+            <parameters>
+                <parameter name="queueName">
+                    <description><![CDATA[Name of the queue to consume from.]]></description>
+                </parameter>
+                <parameter name="fallbackQueueDefinition">
+                    <description><![CDATA[Declaration of a queue definition to use in case no queue with the queueName provided exists in the broker. In case the queue with provided queueName exists, it will be used as is, ignoring the fallback. In case the queue does not exist, a new queue shall be created according to the referenced definition.]]></description>
+                </parameter>
+                <parameter name="ackMode">
+                    <description><![CDATA[The acknowledgment mode to use when consuming from the AMQP broker.]]></description>
+                </parameter>
+                <parameter name="numberOfConsumers">
+                    <description><![CDATA[The number of channels that are spawned per inbound endpoint to receive AMQP messages.]]></description>
+                </parameter>
+                <parameter name="consumerTag">
+                    <description><![CDATA[A client-generated consumer tag to establish context.]]></description>
+                </parameter>
+                <parameter name="recoverStrategy">
+                    <description><![CDATA[Valid values for the recoverStrategy option are: NONE, NO_REQUEUE and REQUEUE.]]></description>
+                </parameter>
+                <parameter name="inboundEncoding">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="inboundContentType">
+                    <description><![CDATA[The default contentType of the Message body to be used if the message doesn't communicate it]]></description>
+                </parameter>
+                <parameter name="createFallbackQueue">
+                    <description><![CDATA[Whether non existing queues will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.]]></description>
+                </parameter>
+                <parameter name="outputMimeType">
+                    <description><![CDATA[The mime type of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="outputEncoding">
+                    <description><![CDATA[The encoding of the payload that this operation outputs.]]></description>
+                </parameter>
+                <parameter name="transactionalAction">
+                    <description><![CDATA[The type of beginning action that sources can take regarding transactions.]]></description>
+                </parameter>
+                <parameter name="transactionType">
+                    <description><![CDATA[The type of transaction to create. Availability will depend on the runtime version.]]></description>
+                </parameter>
+                <parameter name="primaryNodeOnly">
+                    <description><![CDATA[Whether this source should only be executed on the primary node when runnning in Cluster]]></description>
+                </parameter>
+                <parameter name="streamingStrategy">
+                    <description><![CDATA[Configure if repeatable streams should be used and their behaviour]]></description>
+                </parameter>
+                <parameter name="redeliveryPolicy">
+                    <description><![CDATA[Defines a policy for processing the redelivery of the same message]]></description>
+                </parameter>
+                <parameter name="prefetchSize">
+                    <description><![CDATA[This field defines a prefetch size window. The broker will send as much messages as possible without exceeding the prefetchSize window in octets (bytes). 0 is used for no specific limit.]]></description>
+                </parameter>
+                <parameter name="prefetchCount">
+                    <description><![CDATA[Specifies a global prefetch window in terms of whole messages. This field may be used in combination with the prefetch-size field; a message will only be sent in advance if both prefetch windows allow it. 0 is used for no specific limit.]]></description>
+                </parameter>
+                <parameter name="reconnectionStrategy">
+                    <description><![CDATA[A retry strategy in case of connectivity errors]]></description>
+                </parameter>
+                <parameter name="body">
+                    <description><![CDATA[The body of the Message]]></description>
+                </parameter>
+                <parameter name="properties">
+                    <description><![CDATA[Properties of the message]]></description>
+                </parameter>
+                <parameter name="headers">
+                    <description><![CDATA[The custom user properties that should be set to this AmqpMessage]]></description>
+                </parameter>
+                <parameter name="deliveryMode">
+                    <description><![CDATA[The delivery mode to use when publishing to the AMQP broker.]]></description>
+                </parameter>
+                <parameter name="priority">
+                    <description><![CDATA[The priority to use when publishing to the AMQP broker. The priority has possible values from 0 to 9 - default is 0.]]></description>
+                </parameter>
+                <parameter name="requestBrokerConfirms">
+                    <description><![CDATA[Whether it must fail in case no confirmation is provided in case this attribute is set to true."]]></description>
+                </parameter>
+                <parameter name="mandatory">
+                    <description><![CDATA[Whether the operation must fail if it cannot be routed to a queue.]]></description>
+                </parameter>
+                <parameter name="immediate">
+                    <description><![CDATA[Whether the operation must fail if it cannot be routed to a queue consumer immediately.]]></description>
+                </parameter>
+                <parameter name="returnedMessageExchange">
+                    <description><![CDATA[The exchange to publish returned messages.]]></description>
+                </parameter>
+            </parameters>
+        </source>
+    </sources>
+    <types>
+        <type name="com.mule.extensions.amqp.api.config.AmqpAddress">
+            <description><![CDATA[Parameteres in an AMQP address
+
+ @since 1.3.0]]></description>
+            <parameters>
+                <parameter name="host">
+                    <description><![CDATA[Host of the broker to connect to.]]></description>
+                </parameter>
+                <parameter name="port">
+                    <description><![CDATA[Port of the AMQP broker to connect to.]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="com.mule.extensions.amqp.api.config.SocketConfiguration">
+            <description><![CDATA[Socket configuration for the connection
+ 
+ @since 1.5.0]]></description>
+            <parameters>
+                <parameter name="keepAlive">
+                    <description><![CDATA[Keep alive to set to the underlying AMQP connector]]></description>
+                </parameter>
+                <parameter name="soTimeoutTimeUnit">
+                    <description><![CDATA[Timeunit for the SO_TIMEOUT AMQP connection socket configuration.]]></description>
+                </parameter>
+                <parameter name="soTimeout">
+                    <description><![CDATA[SO_TIMEOUT to set to the underlying AMQP connector.]]></description>
+                </parameter>
+                <parameter name="receiveBufferSize">
+                    <description><![CDATA[Receive buffer size to set to the underlying AMQP connector]]></description>
+                </parameter>
+                <parameter name="sendBufferSize">
+                    <description><![CDATA[Send buffer size to set to the underlying AMQP connector]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="com.mule.extensions.amqp.api.message.AmqpAttributes">
+            <description><![CDATA[Contains all the metadata of a AMQP Message, it carries information such as the envelope, the Properties and the required ID
+ for performing an ACK on the Message.
+ <p>
+
+ @since 1.0]]></description>
+            <parameters>
+                <parameter name="envelope">
+                    <description><![CDATA[Encapsulates a group of parameters used for AMQP's Basic methods]]></description>
+                </parameter>
+                <parameter name="properties">
+                    <description><![CDATA[AMQP Message Properties]]></description>
+                </parameter>
+                <parameter name="headers">
+                    <description><![CDATA[AMQP Message parameters]]></description>
+                </parameter>
+                <parameter name="ackId">
+                    <description><![CDATA[The channel ACK ID required to ACK a the current Message if one is available, or null otherwise.]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="com.mule.extensions.amqp.api.message.AmqpProperties">
+            <description><![CDATA[Amqp properties of the message
+
+ @since 1.0]]></description>
+            <parameters>
+                <parameter name="contentType">
+                    <description><![CDATA[The content type of the body]]></description>
+                </parameter>
+                <parameter name="contentEncoding">
+                    <description><![CDATA[The Content Encoding of the published Message]]></description>
+                </parameter>
+                <parameter name="priority">
+                    <description><![CDATA[The priority to use when publishing to the AMQP broker. The priority has possible values from 0 to 9 - default is 0.]]></description>
+                </parameter>
+                <parameter name="correlationId">
+                    <description><![CDATA[Used in case of implementation of RPC pattern to distinguish among messages in a request-reply.]]></description>
+                </parameter>
+                <parameter name="messageId">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="replyTo">
+                    <description><![CDATA[Destination set in case of RPC.]]></description>
+                </parameter>
+                <parameter name="expiration">
+                    <description><![CDATA[Expiration in miliseconds for the message]]></description>
+                </parameter>
+                <parameter name="expirationTimeUnit">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="userId">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="appId">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="clusterId">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="timestamp">
+                    <description><![CDATA[]]></description>
+                </parameter>
+                <parameter name="type">
+                    <description><![CDATA[Type of the consumed message]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="com.mule.extensions.amqp.api.model.ExchangeDefinition">
+            <description><![CDATA[A definition for an AMQP exchange to publish messages to.
+
+ @since 1.0]]></description>
+            <parameters>
+                <parameter name="removalStrategy">
+                    <description><![CDATA[Defines when the declared exchange must be removed from the broker.]]></description>
+                </parameter>
+                <parameter name="type">
+                    <description><![CDATA[The type of exchange to be declared.]]></description>
+                </parameter>
+            </parameters>
+        </type>
+        <type name="com.mule.extensions.amqp.api.model.QueueDefinition">
+            <description><![CDATA[A definition for an AMQP queue to consume messages from.
+
+ @since 1.0]]></description>
+            <parameters>
+                <parameter name="removalStrategy">
+                    <description><![CDATA[Defines when the declared queue must be removed from the broker.]]></description>
+                </parameter>
+                <parameter name="exchangeToBind">
+                    <description><![CDATA[Defines the exchange to bind the queue to.]]></description>
+                </parameter>
+                <parameter name="bindingRoutingKey">
+                    <description><![CDATA[Defines the routing key to use in the binding of the exchange.]]></description>
+                </parameter>
+            </parameters>
+        </type>
+    </types>
+</extension-documentation>
