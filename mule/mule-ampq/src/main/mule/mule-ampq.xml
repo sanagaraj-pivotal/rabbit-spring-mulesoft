@@ -22,6 +22,5 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<flow name="mule-ampqFlow" doc:id="2e8833bc-79e5-4fb7-b645-f6cf1b456a38" >
 		<http:listener doc:name="Listener" doc:id="73dbe0ae-dd96-4c17-a164-6fbc5c364a71" config-ref="HTTP_Listener_config" path="/hell-mule"/>
 		<logger level="INFO" doc:name="Logger" doc:id="41a6d561-409e-4b2b-bfe7-be46eec16340" message="Hello from Mule" />
-		<db:insert doc:name="Insert" doc:id="b41cd3bf-460a-4580-b5d8-770694783bad" config-ref="Database_Config"/>
 	</flow>
 </mule>
