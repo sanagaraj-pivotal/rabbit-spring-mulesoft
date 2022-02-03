@@ -1,0 +1,5 @@
+<bean id="jdbcDataSource" class="org.enhydra.jdbc.standard.StandardDataSource"
+ destroy-method="shutdown">
+   <property name="driverName" value="com.mysql.jdbc.Driver"/>
+   <property name="url" value="jdbc:mysql://localhost:3306"/>
+</bean>

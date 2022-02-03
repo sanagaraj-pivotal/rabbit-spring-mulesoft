@@ -1,0 +1,1046 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:mule="http://www.mulesoft.org/schema/mule/core" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.mulesoft.org/schema/mule/amqp" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"></xs:import>
+  <xs:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"></xs:import>
+  <xs:import namespace="http://www.mulesoft.org/schema/mule/core" schemaLocation="http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></xs:import>
+  <xs:import namespace="http://www.mulesoft.org/schema/mule/tls" schemaLocation="http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd"></xs:import>
+  <xs:complexType name="com.mule.extensions.amqp.api.model.ExchangeDefinition">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractExtensionType">
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.model.RemovalStrategyEnumType" use="optional" default="EXPLICIT" name="removalStrategy"></xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.model.ExchangeTypeEnumType" use="optional" default="FANOUT" name="type"></xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns:mule="http://www.mulesoft.org/schema/mule/core" substitutionGroup="mule:abstract-shared-extension" abstract="true" name="abstract-exchange-defintiion"></xs:element>
+  <xs:element xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" substitutionGroup="amqp:abstract-exchange-defintiion" name="exchange-defintiion">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="amqp:com.mule.extensions.amqp.api.model.ExchangeDefinition">
+          <xs:attribute type="xs:string" use="optional" name="name"></xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="com.mule.extensions.amqp.api.model.QueueDefinition">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractExtensionType">
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.model.RemovalStrategyEnumType" use="optional" default="EXPLICIT" name="removalStrategy"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="exchangeToBind"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="bindingRoutingKey"></xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns:mule="http://www.mulesoft.org/schema/mule/core" substitutionGroup="mule:abstract-shared-extension" abstract="true" name="abstract-queue-definition"></xs:element>
+  <xs:element xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" substitutionGroup="amqp:abstract-queue-definition" name="queue-definition">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="amqp:com.mule.extensions.amqp.api.model.QueueDefinition">
+          <xs:attribute type="xs:string" use="optional" name="name"></xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element xmlns:mule="http://www.mulesoft.org/schema/mule/core" substitutionGroup="mule:abstract-shared-extension" name="config">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="mule:abstractExtensionType">
+          <xs:annotation>
+            <xs:documentation>Base configuration for AmqpConnector</xs:documentation>
+          </xs:annotation>
+          <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="1" maxOccurs="1" ref="mule:abstractConnectionProvider"></xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" ref="mule:expiration-policy"></xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="consumer-config">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="mule:abstractExtensionType">
+                    <xs:sequence></xs:sequence>
+                    <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.AckModeEnumType" use="optional" default="IMMEDIATE" name="ackMode">
+                      <xs:annotation>
+                        <xs:documentation>The acknowledgment mode to use when consuming from the AMQP broker. If a transaction is opened in the channel, message acknowledgment is handled automatically by commit, and recovery is handled automatically by rollback.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="noLocal">
+                      <xs:annotation>
+                        <xs:documentation>If set to true, the server does not send messages to the connection that published them.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="exclusiveConsumers">
+                      <xs:annotation>
+                        <xs:documentation>Set to true if the connector should only create exclusive consumers. Only the consumer created can access the queue.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableInt" use="optional" default="4" name="numberOfConsumers">
+                      <xs:annotation>
+                        <xs:documentation>It is the number of consumers spawned by message source to receive AMQP messages. Each consumer will create a channel.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="publisher-config">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="mule:abstractExtensionType">
+                    <xs:sequence></xs:sequence>
+                    <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.DeliveryModeEnumType" use="optional" default="PERSISTENT" name="deliveryMode">
+                      <xs:annotation>
+                        <xs:documentation>The delivery mode to use when publishing to the AMQP broker.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableInt" use="optional" default="0" name="priority">
+                      <xs:annotation>
+                        <xs:documentation>The priority to use when publishing to the AMQP broker. The priority has possible values from 0 to 9 - default is 0.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="requestBrokerConfirms">
+                      <xs:annotation>
+                        <xs:documentation>Whether it must fail in case no confirmation is provided.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="mandatory">
+                      <xs:annotation>
+                        <xs:documentation>Whether the operation must fail if it cannot be routed to a queue.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="immediate">
+                      <xs:annotation>
+                        <xs:documentation>Whether the operation must fail if it cannot be routed to a queue consumer immediately.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="xs:string" use="optional" name="returnedMessageExchange">
+                      <xs:annotation>
+                        <xs:documentation>The exchange to publish returned messages.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="quality-of-service-config">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="mule:abstractExtensionType">
+                    <xs:sequence></xs:sequence>
+                    <xs:attribute type="mule:substitutableInt" use="optional" default="0" name="prefetchSize">
+                      <xs:annotation>
+                        <xs:documentation>This field defines a prefetch size window. The broker will send as much messages as possible without exceeding the prefetchSize window in octets (bytes). 0 is used for no specific limit.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute type="mule:substitutableInt" use="optional" default="0" name="prefetchCount">
+                      <xs:annotation>
+                        <xs:documentation>Specifies a global prefetch window in terms of whole messages. This field may be used in combination with the prefetch-size field; a message will only be sent in advance if both prefetch windows allow it. 0 is used for no specific limit.</xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute type="xs:string" use="optional" name="encoding">
+            <xs:annotation>
+              <xs:documentation>The default encoding of the Message body to be used if the message doesn't communicate it</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="xs:string" use="optional" default="*/*" name="contentType">
+            <xs:annotation>
+              <xs:documentation>The default contentType of the Message body to be used if the message doesn't communicate it</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:expressionBoolean" use="optional" default="true" name="createFallbackQueue">
+            <xs:annotation>
+              <xs:documentation>Whether non existing queues will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:expressionBoolean" use="optional" default="true" name="createFallbackExchange">
+            <xs:annotation>
+              <xs:documentation>"Whether non existing exchanges will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="org.mule.runtime.extension.api.runtime.parameter.OutboundCorrelationStrategyEnumType" use="optional" default="AUTO" name="sendCorrelationId">
+            <xs:annotation>
+              <xs:documentation>Whether to specify a correlationId when publishing messages. This applies both for custom correlation ids specifies at the operation level and for default correlation Ids taken from the current event</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="xs:string" use="required" name="name">
+            <xs:annotation>
+              <xs:documentation>The identifier of this element used to reference it in other components</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element xmlns:mule="http://www.mulesoft.org/schema/mule/core" substitutionGroup="mule:abstractConnectionProvider" name="connection">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="mule:abstractConnectionProviderType">
+          <xs:sequence minOccurs="0" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" ref="mule:reconnection"></xs:element>
+            <xs:element xmlns:tls="http://www.mulesoft.org/schema/mule/tls" minOccurs="0" maxOccurs="1" ref="tls:context"></xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="socket-configuration">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.config.SocketConfiguration"></xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="fallback-addresses">
+              <xs:annotation>
+                <xs:documentation>The addresses of the broker nodes to attempt connection to, should the connection to main broker fail.</xs:documentation>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" minOccurs="0" maxOccurs="unbounded" ref="amqp:abstract-fallback-address"></xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute type="xs:string" use="optional" name="tlsContext"></xs:attribute>
+          <xs:attribute type="xs:string" use="optional" name="socketConfiguration"></xs:attribute>
+          <xs:attribute type="xs:string" use="required" name="host">
+            <xs:annotation>
+              <xs:documentation>Host of the broker to connect to.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableInt" use="optional" name="port">
+            <xs:annotation>
+              <xs:documentation>Port of the AMQP broker to connect to.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="xs:string" use="optional" default="/" name="virtualHost">
+            <xs:annotation>
+              <xs:documentation>Virtual host to use in the AMQP broker.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:expressionString" use="optional" name="username">
+            <xs:annotation>
+              <xs:documentation>Username to be used when providing credentials for authentication.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:expressionString" use="optional" name="password">
+            <xs:annotation>
+              <xs:documentation>Password to be used when providing credentials for authentication.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="useTls">
+            <xs:annotation>
+              <xs:documentation>Whether TLS is needed to be used. In case it is not provided, the default for AMQP connection will be used.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="useSni">
+            <xs:annotation>
+              <xs:documentation>Whether Server Name Indication is needed to be used in the ClientHello Message</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="useSasl">
+            <xs:annotation>
+              <xs:documentation>Whether SASL (EXTERNAL) Auth mechanism is used (No username or password required).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableInt" use="optional" default="60" name="heartbeatTimeout">
+            <xs:annotation>
+              <xs:documentation>The heartbeat timeout. Heartbeat frames will be sent at about 1/2 the timeout interval.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableInt" use="optional" name="handshakeTimeout">
+            <xs:annotation>
+              <xs:documentation>AMQP 0.9.1 timeout to set to the underlying AMQP connector.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="java.util.concurrent.TimeUnitEnumType" use="optional" default="MILLISECONDS" name="handshakeTimeoutTimeUnit">
+            <xs:annotation>
+              <xs:documentation>Timeunit for the handshake timeout AMQP connection socket configuration.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute type="mule:substitutableName" use="optional" name="fallbackAddresses">
+            <xs:annotation>
+              <xs:documentation>The addresses of the broker nodes to attempt connection to, should the connection to main broker fail.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="com.mule.extensions.amqp.api.config.SocketConfiguration">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractExtensionType">
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="keepAlive"></xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="java.util.concurrent.TimeUnitEnumType" use="optional" default="MILLISECONDS" name="soTimeoutTimeUnit"></xs:attribute>
+        <xs:attribute type="mule:substitutableInt" use="optional" name="soTimeout"></xs:attribute>
+        <xs:attribute type="mule:substitutableInt" use="optional" name="receiveBufferSize"></xs:attribute>
+        <xs:attribute type="mule:substitutableInt" use="optional" name="sendBufferSize"></xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="com.mule.extensions.amqp.api.config.AmqpAddress">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractExtensionType">
+        <xs:attribute type="xs:string" use="required" name="host"></xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="port"></xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" type="amqp:com.mule.extensions.amqp.api.config.AmqpAddress" abstract="true" name="abstract-fallback-address"></xs:element>
+  <xs:element xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" substitutionGroup="amqp:abstract-fallback-address" name="fallback-address">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="amqp:com.mule.extensions.amqp.api.config.AmqpAddress"></xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="ListenerType" substitutionGroup="mule:abstract-message-source" name="listener">
+    <xs:annotation>
+      <xs:documentation>AMQP Listener for Queues, allows to listen for incoming messages.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="ListenerType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractMessageSourceType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-redelivery-policy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-byte-streaming-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-reconnection-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="fallback-queue-definition">
+            <xs:annotation>
+              <xs:documentation>Declaration of a queue definition to use in case no queue with the queueName provided exists in the broker. In case the queue with provided queueName exists, it will be used as is, ignoring the fallback. In case the queue does not exist, a new queue shall be created according to the referenced definition.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.model.QueueDefinition"></xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="listener-quality-of-service-config">
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension base="mule:abstractExtensionType">
+                  <xs:sequence></xs:sequence>
+                  <xs:attribute type="mule:substitutableInt" use="optional" name="prefetchSize">
+                    <xs:annotation>
+                      <xs:documentation>This field defines a prefetch size window. The broker will send as much messages as possible without exceeding the prefetchSize window in octets (bytes). 0 is used for no specific limit.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:substitutableInt" use="optional" name="prefetchCount">
+                    <xs:annotation>
+                      <xs:documentation>Specifies a global prefetch window in terms of whole messages. This field may be used in combination with the prefetch-size field; a message will only be sent in advance if both prefetch windows allow it. 0 is used for no specific limit.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="response">
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension base="mule:abstractExtensionType">
+                  <xs:sequence>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="body">
+                      <xs:annotation>
+                        <xs:documentation>The body of the Message</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" maxOccurs="1" name="properties">
+                      <xs:annotation>
+                        <xs:documentation>Properties of the message</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:complexContent>
+                          <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.message.AmqpProperties"></xs:extension>
+                        </xs:complexContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="headers">
+                      <xs:annotation>
+                        <xs:documentation>The custom user properties that should be set to this AmqpMessage</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" use="optional" name="properties">
+                    <xs:annotation>
+                      <xs:documentation>Properties of the message</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.DeliveryModeEnumType" use="optional" default="PERSISTENT" name="deliveryMode">
+                    <xs:annotation>
+                      <xs:documentation>The delivery mode to use when publishing to the AMQP broker.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:expressionInt" use="optional" default="0" name="priority">
+                    <xs:annotation>
+                      <xs:documentation>The priority to use when publishing to the AMQP broker. The priority has possible values from 0 to 9 - default is 0.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:expressionBoolean" use="optional" default="false" name="requestBrokerConfirms">
+                    <xs:annotation>
+                      <xs:documentation>Whether it must fail in case no confirmation is provided in case this attribute is set to true."</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:expressionBoolean" use="optional" default="false" name="mandatory">
+                    <xs:annotation>
+                      <xs:documentation>Whether the operation must fail if it cannot be routed to a queue.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:expressionBoolean" use="optional" default="false" name="immediate">
+                    <xs:annotation>
+                      <xs:documentation>Whether the operation must fail if it cannot be routed to a queue consumer immediately.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute type="mule:expressionString" use="optional" name="returnedMessageExchange">
+                    <xs:annotation>
+                      <xs:documentation>The exchange to publish returned messages.</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" use="required" name="queueName">
+          <xs:annotation>
+            <xs:documentation>Name of the queue to consume from.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="fallbackQueueDefinition">
+          <xs:annotation>
+            <xs:documentation>Declaration of a queue definition to use in case no queue with the queueName provided exists in the broker. In case the queue with provided queueName exists, it will be used as is, ignoring the fallback. In case the queue does not exist, a new queue shall be created according to the referenced definition.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.AckModeEnumType" use="optional" name="ackMode">
+          <xs:annotation>
+            <xs:documentation>The acknowledgment mode to use when consuming from the AMQP broker.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableInt" use="optional" name="numberOfConsumers">
+          <xs:annotation>
+            <xs:documentation>The number of channels that are spawned per inbound endpoint to receive AMQP messages.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="consumerTag">
+          <xs:annotation>
+            <xs:documentation>A client-generated consumer tag to establish context.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.listener.RecoverStrategyEnumType" use="optional" default="REQUEUE" name="recoverStrategy">
+          <xs:annotation>
+            <xs:documentation>Valid values for the recoverStrategy option are: NONE, NO_REQUEUE and REQUEUE.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="inboundEncoding"></xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="inboundContentType">
+          <xs:annotation>
+            <xs:documentation>The default contentType of the Message body to be used if the message doesn't communicate it</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" name="createFallbackQueue">
+          <xs:annotation>
+            <xs:documentation>Whether non existing queues will be created according to the fallback definition or an error will be raised if they do not exist. This can be disabled in the mule app is not intended to change the AMQP topography.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
+          <xs:annotation>
+            <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputEncoding">
+          <xs:annotation>
+            <xs:documentation>The encoding of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="required" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>The name of the configuration to be used to execute this component</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="org.mule.runtime.extension.api.tx.SourceTransactionalActionEnumType" use="optional" default="NONE" name="transactionalAction">
+          <xs:annotation>
+            <xs:documentation>The type of beginning action that sources can take regarding transactions.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:transactionType" use="optional" default="LOCAL" name="transactionType">
+          <xs:annotation>
+            <xs:documentation>The type of transaction to create. Availability will depend on the runtime version.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" name="primaryNodeOnly">
+          <xs:annotation>
+            <xs:documentation>Whether this source should only be executed on the primary node when runnning in Cluster</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="com.mule.extensions.amqp.api.message.AmqpProperties">
+    <xs:annotation>
+      <xs:documentation>Properties of the message</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractExtensionType">
+        <xs:attribute type="mule:expressionString" use="optional" default="*/*" name="contentType"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="contentEncoding"></xs:attribute>
+        <xs:attribute type="mule:expressionInt" use="optional" default="0" name="priority"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="correlationId"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="messageId"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="replyTo"></xs:attribute>
+        <xs:attribute type="mule:expressionInt" use="optional" name="expiration"></xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="java.util.concurrent.TimeUnitEnumType" use="optional" default="MILLISECONDS" name="expirationTimeUnit"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="userId"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="appId"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="clusterId"></xs:attribute>
+        <xs:attribute type="mule:expressionDateTime" use="optional" name="timestamp"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="type"></xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="ConsumeType" substitutionGroup="mule:abstract-operator" name="consume">
+    <xs:annotation>
+      <xs:documentation>Operation that allows the user to consume a single AmqpMessage from a given Queue.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="ConsumeType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-byte-streaming-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-reconnection-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="fallback-queue-definition">
+            <xs:annotation>
+              <xs:documentation>The queue definition to use for queue declaration in case there is no queue with the queueName</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.model.QueueDefinition"></xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:expressionString" use="required" name="queueName">
+          <xs:annotation>
+            <xs:documentation>The name of the queue from where the Message should be consumed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="contentType">
+          <xs:annotation>
+            <xs:documentation>The content type of the message body</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="encoding">
+          <xs:annotation>
+            <xs:documentation>The encoding of the message body</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="fallbackQueueDefinition">
+          <xs:annotation>
+            <xs:documentation>The queue definition to use for queue declaration in case there is no queue with the queueName</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.ConsumerAckModeEnumType" use="optional" name="ackMode">
+          <xs:annotation>
+            <xs:documentation>The ACK mode to use when consuming a message</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="consumerTag">
+          <xs:annotation>
+            <xs:documentation>The consumer tag to use for the consumer involved in the operation</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionLong" use="optional" default="10000" name="maximumWait">
+          <xs:annotation>
+            <xs:documentation>Maximum time to wait for a message to arrive before timeout</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="java.util.concurrent.TimeUnitEnumType" use="optional" default="MILLISECONDS" name="maximumWaitUnit">
+          <xs:annotation>
+            <xs:documentation>Time unit to be used in the maximumWaitTime configuration</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionBoolean" use="optional" name="createFallbackQueue"></xs:attribute>
+        <xs:attribute type="mule:operationTransactionalActionType" use="optional" default="JOIN_IF_POSSIBLE" name="transactionalAction">
+          <xs:annotation>
+            <xs:documentation>information of the current transaction in case it exists</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
+          <xs:annotation>
+            <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputEncoding">
+          <xs:annotation>
+            <xs:documentation>The encoding of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="required" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>The name of the configuration to be used to execute this component</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" default="#[payload]" name="targetValue">
+          <xs:annotation>
+            <xs:documentation>An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="PublishType" substitutionGroup="mule:abstract-operator" name="publish">
+    <xs:annotation>
+      <xs:documentation>Operation that allows the user to publish a single AmqpMessage to a given exchange</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="PublishType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-reconnection-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="fallback-exchange-definition">
+            <xs:annotation>
+              <xs:documentation>The exchange to use for exchange declaration in case there is no exchange with the exchangeName</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.model.ExchangeDefinition"></xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="routing-keys">
+            <xs:annotation>
+              <xs:documentation>List of routing keys</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" name="routing-key">
+                  <xs:complexType>
+                    <xs:attribute type="mule:expressionString" use="required" name="value"></xs:attribute>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="message">
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension base="mule:abstractExtensionType">
+                  <xs:sequence>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="body">
+                      <xs:annotation>
+                        <xs:documentation>The body of the Message</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" maxOccurs="1" name="properties">
+                      <xs:annotation>
+                        <xs:documentation>Properties of the message</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:complexContent>
+                          <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.message.AmqpProperties"></xs:extension>
+                        </xs:complexContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="headers">
+                      <xs:annotation>
+                        <xs:documentation>The custom user properties that should be set to this AmqpMessage</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" use="optional" name="properties">
+                    <xs:annotation>
+                      <xs:documentation>Properties of the message</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:expressionString" use="optional" name="exchangeName">
+          <xs:annotation>
+            <xs:documentation>The name of the exchange to publish the message to</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="fallbackExchangeDefinition">
+          <xs:annotation>
+            <xs:documentation>The exchange to use for exchange declaration in case there is no exchange with the exchangeName</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionList" use="optional" name="routingKeys">
+          <xs:annotation>
+            <xs:documentation>List of routing keys</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.DeliveryModeEnumType" use="optional" name="deliveryMode">
+          <xs:annotation>
+            <xs:documentation>The delivery mode to use when publishing to the AMQP broker</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:operationTransactionalActionType" use="optional" default="JOIN_IF_POSSIBLE" name="transactionalAction">
+          <xs:annotation>
+            <xs:documentation>information of the current transaction in case it exists</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="org.mule.runtime.extension.api.runtime.parameter.OutboundCorrelationStrategyEnumType" use="optional" name="sendCorrelationId">
+          <xs:annotation>
+            <xs:documentation>options on whether to include an outbound correlation id or not</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionBoolean" use="optional" name="createFallbackExchange"></xs:attribute>
+        <xs:attribute type="xs:string" use="required" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>The name of the configuration to be used to execute this component</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="requestBrokerConfirms">
+          <xs:annotation>
+            <xs:documentation>Expects a confirmation from a message published. An exception is raised in case no confirmation is provided in case this attribute is set to true.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="mandatory">
+          <xs:annotation>
+            <xs:documentation>Tells the server how to react if the message cannot be routed to a queue. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any message that cannot be routed. If set to false, the server silently drops the message.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="immediate">
+          <xs:annotation>
+            <xs:documentation>Tells the server how to react if the message cannot be routed to a queue consumer immediately. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any undeliverable message. If set to false, the server queues the message, but with no guarantee that the message will ever be consumed.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="returnedMessageExchange">
+          <xs:annotation>
+            <xs:documentation>The exchange to publish returned messages.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="PublishConsumeType" substitutionGroup="mule:abstract-operator" name="publish-consume">
+    <xs:annotation>
+      <xs:documentation>Operation that allows the user to send a message to a AMQP Exchange and waits for a response either to the provided replyTo destination or to a temporary destination created dynamically</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="PublishConsumeType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1">
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-byte-streaming-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" ref="mule:abstract-reconnection-strategy"></xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="fallback-exchange-definition">
+            <xs:annotation>
+              <xs:documentation>The queue exchange to use for exchange declaration in case there is no exchange with the exchangeName</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.model.ExchangeDefinition"></xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element minOccurs="0" maxOccurs="1" name="message">
+            <xs:complexType>
+              <xs:complexContent>
+                <xs:extension base="mule:abstractExtensionType">
+                  <xs:sequence>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="body">
+                      <xs:annotation>
+                        <xs:documentation>The body of the Message</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element minOccurs="0" maxOccurs="1" name="properties">
+                      <xs:annotation>
+                        <xs:documentation>Properties of the message</xs:documentation>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:complexContent>
+                          <xs:extension xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" base="amqp:com.mule.extensions.amqp.api.message.AmqpProperties"></xs:extension>
+                        </xs:complexContent>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element type="xs:string" minOccurs="0" maxOccurs="1" name="headers">
+                      <xs:annotation>
+                        <xs:documentation>The custom user properties that should be set to this AmqpMessage</xs:documentation>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" use="optional" name="properties">
+                    <xs:annotation>
+                      <xs:documentation>Properties of the message</xs:documentation>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:extension>
+              </xs:complexContent>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute type="mule:expressionString" use="required" name="exchangeName">
+          <xs:annotation>
+            <xs:documentation>The name of the exchange to publish the message to</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="contentType">
+          <xs:annotation>
+            <xs:documentation>The content type of the message body</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="encoding">
+          <xs:annotation>
+            <xs:documentation>The encoding of the message body</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="fallbackExchangeDefinition">
+          <xs:annotation>
+            <xs:documentation>The queue exchange to use for exchange declaration in case there is no exchange with the exchangeName</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="routingKey">
+          <xs:annotation>
+            <xs:documentation>The routing key to publish to</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="com.mule.extensions.amqp.api.config.DeliveryModeEnumType" use="optional" name="deliveryMode">
+          <xs:annotation>
+            <xs:documentation>The delivery mode to use when publishing to the AMQP broker</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionLong" use="optional" default="10000" name="maximumWait">
+          <xs:annotation>
+            <xs:documentation>The maximum time to wait for a message to arrive before timeout</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="java.util.concurrent.TimeUnitEnumType" use="optional" default="MILLISECONDS" name="maximumWaitUnit">
+          <xs:annotation>
+            <xs:documentation>The time unit to be used in the maximumWaitTime configuration</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:operationTransactionalActionType" use="optional" default="JOIN_IF_POSSIBLE" name="transactionalAction">
+          <xs:annotation>
+            <xs:documentation>information of the current transaction in case it exists</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute xmlns="http://www.mulesoft.org/schema/mule/amqp" type="org.mule.runtime.extension.api.runtime.parameter.OutboundCorrelationStrategyEnumType" use="optional" name="sendCorrelationId">
+          <xs:annotation>
+            <xs:documentation>options on whether to include an outbound correlation id or not</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionBoolean" use="optional" name="createFallbackExchange"></xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputMimeType">
+          <xs:annotation>
+            <xs:documentation>The mime type of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" name="outputEncoding">
+          <xs:annotation>
+            <xs:documentation>The encoding of the payload that this operation outputs.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="required" name="config-ref">
+          <xs:annotation>
+            <xs:documentation>The name of the configuration to be used to execute this component</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="requestBrokerConfirms">
+          <xs:annotation>
+            <xs:documentation>Expects a confirmation from a message published. An exception is raised in case no confirmation is provided in case this attribute is set to true.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="mandatory">
+          <xs:annotation>
+            <xs:documentation>Tells the server how to react if the message cannot be routed to a queue. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any message that cannot be routed. If set to false, the server silently drops the message.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:substitutableBoolean" use="optional" default="false" name="immediate">
+          <xs:annotation>
+            <xs:documentation>Tells the server how to react if the message cannot be routed to a queue consumer immediately. If set to true, the server throws an exception (UNROUTABLE_MESSAGE, see below in the operation spec) for any undeliverable message. If set to false, the server queues the message, but with no guarantee that the message will ever be consumed.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="returnedMessageExchange">
+          <xs:annotation>
+            <xs:documentation>The exchange to publish returned messages.</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="xs:string" use="optional" name="target">
+          <xs:annotation>
+            <xs:documentation>The name of a variable on which the operation's output will be placed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionString" use="optional" default="#[payload]" name="targetValue">
+          <xs:annotation>
+            <xs:documentation>An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="AckType" substitutionGroup="mule:abstract-operator" name="ack">
+    <xs:annotation>
+      <xs:documentation>Operation that acks a message with the delivery tag</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="AckType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1"></xs:sequence>
+        <xs:attribute type="mule:expressionString" use="required" name="ackId">
+          <xs:annotation>
+            <xs:documentation>delivery tag of the message to be ack'ed</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element xmlns="http://www.mulesoft.org/schema/mule/amqp" xmlns:mule="http://www.mulesoft.org/schema/mule/core" type="RejectType" substitutionGroup="mule:abstract-operator" name="reject">
+    <xs:annotation>
+      <xs:documentation>Operation that allows the user to reject a delivered AmqpMessage.</xs:documentation>
+    </xs:annotation>
+  </xs:element>
+  <xs:complexType name="RejectType">
+    <xs:complexContent>
+      <xs:extension xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:abstractOperatorType">
+        <xs:sequence minOccurs="0" maxOccurs="1"></xs:sequence>
+        <xs:attribute type="mule:expressionString" use="required" name="ackId">
+          <xs:annotation>
+            <xs:documentation>delivery tag of the message to be rejected</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute type="mule:expressionBoolean" use="optional" default="false" name="requeue">
+          <xs:annotation>
+            <xs:documentation>Indicates whether the rejected message has to be requeued</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.model.RemovalStrategyEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="EXPLICIT"></xs:enumeration>
+          <xs:enumeration value="SHUTDOWN"></xs:enumeration>
+          <xs:enumeration value="UNUSED"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.model.ExchangeTypeEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="DIRECT"></xs:enumeration>
+          <xs:enumeration value="TOPIC"></xs:enumeration>
+          <xs:enumeration value="FANOUT"></xs:enumeration>
+          <xs:enumeration value="HEADERS"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="org.mule.runtime.extension.api.runtime.parameter.OutboundCorrelationStrategyEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="AUTO"></xs:enumeration>
+          <xs:enumeration value="ALWAYS"></xs:enumeration>
+          <xs:enumeration value="NEVER"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.config.AckModeEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="IMMEDIATE"></xs:enumeration>
+          <xs:enumeration value="AUTO"></xs:enumeration>
+          <xs:enumeration value="MANUAL"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.config.DeliveryModeEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="TRANSIENT"></xs:enumeration>
+          <xs:enumeration value="PERSISTENT"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="java.util.concurrent.TimeUnitEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="NANOSECONDS"></xs:enumeration>
+          <xs:enumeration value="MICROSECONDS"></xs:enumeration>
+          <xs:enumeration value="MILLISECONDS"></xs:enumeration>
+          <xs:enumeration value="SECONDS"></xs:enumeration>
+          <xs:enumeration value="MINUTES"></xs:enumeration>
+          <xs:enumeration value="HOURS"></xs:enumeration>
+          <xs:enumeration value="DAYS"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.listener.RecoverStrategyEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="NONE"></xs:enumeration>
+          <xs:enumeration value="NO_REQUEUE"></xs:enumeration>
+          <xs:enumeration value="REQUEUE"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="org.mule.runtime.extension.api.tx.SourceTransactionalActionEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ALWAYS_BEGIN"></xs:enumeration>
+          <xs:enumeration value="NONE"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="com.mule.extensions.amqp.api.config.ConsumerAckModeEnumType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="IMMEDIATE"></xs:enumeration>
+          <xs:enumeration value="MANUAL"></xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction xmlns:mule="http://www.mulesoft.org/schema/mule/core" base="mule:propertyPlaceholderType"></xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+</xs:schema>
